@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatGPT Chat</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="chat-container">
+    <div id="messages-container">
+      <div class="message system-message">
+        <div class="message-content">
+          <strong>ChatGPT Assistant Ready</strong>
+          <p>Ask me anything! Use the screenshot button to capture and analyze the current page.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="input-container">
+      <button id="screenshot-btn" title="Capture Screenshot" aria-label="Capture Screenshot">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+          <path fill="currentColor" d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+        </svg>
+      </button>
+
+      <textarea
+        id="message-input"
+        placeholder="Type your message here..."
+        rows="1"
+      ></textarea>
+
+      <button id="send-btn" title="Send Message" aria-label="Send Message">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+          <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="loading-indicator" style="display: none;">
+      <div class="spinner"></div>
+      <span>Thinking...</span>
+    </div>
+  </div>
+
+  <script src="chat.js"></script>
+</body>
+</html>
