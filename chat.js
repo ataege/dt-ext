@@ -5,12 +5,12 @@
 // TODO: Replace with your actual OpenAI API key
 const OPENAI_API_KEY = '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';
 
-// Model configuration - Change this when GPT-5.1 becomes available
-// Current options: 'gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'
-// For vision/screenshot support, use 'gpt-4o' or 'gpt-4-turbo' (with vision)
-const MODEL_NAME = 'gpt-5.1-2025-11-13';
+// Model configuration - Using Responses API for better performance
+// Current options: 'gpt-5.2-2025-12-11', 'gpt-5.1-2025-11-13', 'gpt-4o'
+// For vision/screenshot support, use 'gpt-4o' or newer models
+const MODEL_NAME = 'gpt-5.2-2025-12-11';
 
-const API_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+const API_ENDPOINT = 'https://api.openai.com/v1/responses';
 // =======================================
 
 // Chat state
@@ -34,10 +34,6 @@ function initChatInterface(elements) {
 
   setupEventListeners();
   autoResizeTextarea();
-
-  console.log('ChatGPT chat interface initialized');
-  console.log('Model:', MODEL_NAME);
-  console.log('API Key configured:', OPENAI_API_KEY !== 'YOUR_API_KEY_HERE');
 }
 
 function setupEventListeners() {
@@ -120,19 +116,17 @@ async function handleScreenshot() {
 
     displayMessage('user', '📸 Screenshot captured', response.dataUrl);
 
-    // Add to conversation history with image
+    // Add to conversation history with image (Responses API format)
     conversationHistory.push({
       role: 'user',
       content: [
         {
-          type: 'text',
-          text: 'Read the question displayed on the screen. Solve it and respond with the final answer followed by a brief explanation (1-2 sentences). Keep the explanation concise and relevant to how the answer was found.'
+          type: 'input_text',
+          text: 'Analyze this programming/algorithm question from the screenshot. Provide:\n1. A clear solution approach explained simply\n2. Complete working C++ code in student/beginner style:\n   - Use simple, readable variable names (not single letters)\n   - Add comments explaining the logic step-by-step\n   - Write straightforward code (not overly optimized)\n   - Make it look like a student wrote it naturally\n3. Time and space complexity analysis\n4. Key insights about the algorithm or data structure\n\nIMPORTANT: Write the code as if a student solving it for the first time would write - clear, simple, and well-commented, not professional/competitive programming style.'
         },
         {
-          type: 'image_url',
-          image_url: {
-            url: response.dataUrl
-          }
+          type: 'input_image',
+          image_url: response.dataUrl
         }
       ]
     });
@@ -163,9 +157,11 @@ async function sendToOpenAI() {
         'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
+        reasoning: {
+          effort: 'high'
+        },
         model: MODEL_NAME,
-        messages: conversationHistory,
-        temperature: 0.7
+        input: conversationHistory,
       })
     });
 
@@ -175,7 +171,20 @@ async function sendToOpenAI() {
     }
 
     const data = await response.json();
-    const assistantMessage = data.choices[0].message.content;
+
+    // Parse Responses API output structure
+    let assistantMessage = '';
+    if (data.output && Array.isArray(data.output)) {
+      // Find the message object in output array
+      const messageObj = data.output.find(item => item.type === 'message');
+      if (messageObj && messageObj.content && Array.isArray(messageObj.content)) {
+        // Find the output_text item in content array
+        const textObj = messageObj.content.find(item => item.type === 'output_text');
+        if (textObj && textObj.text) {
+          assistantMessage = textObj.text;
+        }
+      }
+    }
 
     // Add to conversation history
     conversationHistory.push({
@@ -204,6 +213,44 @@ function displayMessage(role, content, imageUrl = null) {
   const contentDiv = document.createElement('div');
   contentDiv.className = 'message-content';
 
+  // Add copy button for assistant messages
+  if (role === 'assistant') {
+    const copyButton = document.createElement('button');
+    copyButton.className = 'copy-button';
+    copyButton.title = 'Copy message';
+    copyButton.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+      </svg>
+    `;
+
+    copyButton.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        await navigator.clipboard.writeText(content);
+        copyButton.classList.add('copied');
+        copyButton.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+        `;
+
+        setTimeout(() => {
+          copyButton.classList.remove('copied');
+          copyButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+            </svg>
+          `;
+        }, 2000);
+      } catch (error) {
+        console.error('Failed to copy text:', error);
+      }
+    });
+
+    contentDiv.appendChild(copyButton);
+  }
+
   // Add image if present
   if (imageUrl) {
     const img = document.createElement('img');
@@ -226,20 +273,52 @@ function displayMessage(role, content, imageUrl = null) {
 
   messagesContainer.appendChild(messageDiv);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+  // Apply syntax highlighting manually to ensure it works
+  if (role === 'assistant') {
+    // Wait a bit for the DOM to be ready
+    requestAnimationFrame(() => {
+      if (window.hljs) {
+        const codeBlocks = messageDiv.querySelectorAll('pre code');
+        console.log('Found code blocks:', codeBlocks.length);
+        codeBlocks.forEach((block, index) => {
+          // Check if already highlighted
+          if (!block.classList.contains('hljs')) {
+            console.log(`Highlighting block ${index}:`, block.textContent.substring(0, 50));
+            try {
+              window.hljs.highlightElement(block);
+              console.log(`Block ${index} highlighted successfully`);
+            } catch (e) {
+              console.error('Error highlighting block:', e);
+            }
+          }
+        });
+      } else {
+        console.error('hljs not available');
+      }
+    });
+  }
 }
 
 function formatMessage(text) {
-  // Basic markdown formatting
+  // Use marked.js for full Markdown support if available
+  if (window.marked) {
+    try {
+      return window.marked.parse(text);
+    } catch (e) {
+      console.error('Markdown parsing error:', e);
+    }
+  }
+
+  // Fallback to basic formatting if marked.js isn't loaded yet
   let formatted = text
-    // Code blocks
-    .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-    // Inline code
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    // Bold
+    .replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+      const language = lang ? ` class="language-${lang.toLowerCase()}"` : '';
+      return `<pre><code${language}>${code.trim()}</code></pre>`;
+    })
+    .replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    // Italic
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    // Line breaks
     .replace(/\n/g, '<br>');
 
   return formatted;
