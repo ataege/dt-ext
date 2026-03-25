@@ -351,39 +351,20 @@
 				content: [
 					{
 						type: 'input_text',
-						/*text: `Analyze this algorithms/data structures question from the screenshot.
+						text: `Analyze this algorithms/data structures question from the screenshot.
 
-**If it's a MULTIPLE CHOICE question:**
-- State the correct answer clearly
-- Explain WHY that answer is correct
-- Briefly explain why other options are wrong (if applicable)
+**MULTIPLE CHOICE QUESTION:**
+- State ALL correct answer(s) - there may be more than one correct answer
+- Format: "Answer: A, C" or "Answer: B" (letters only, comma-separated if multiple)
+- Brief explanation of why each selected answer is correct
 
-**If it's an OPEN-ENDED or CODING question:**
-- Explain the solution approach clearly
-- Provide the answer or solution
-- If code is needed, write clean, well-commented code
-- Include time/space complexity if relevant
+**OPEN-ENDED QUESTION:**
+- Provide a clear, concise answer
+- Include relevant algorithm/data structure concepts
+- If code helps explain, include brief pseudocode or code snippet
+- Mention time/space complexity if applicable
 
-Focus on helping understand the underlying algorithm or data structure concept. Be concise but thorough.`*/
-						// text: "Read the question from the screenshot and provide just the answer."
-						text: `You are given a screenshot of a test webpage showing a multiple-choice question and its answer options.
-
-1. Read the question and all visible options carefully (ignore browser/UI elements).
-
-2. Determine the correct option(s) based only on what is shown in the screenshot.
-
-Output format (strict):
-
-If options are labeled (A, B, C, D…): output only the letter(s).
-
-Single answer: B
-
-“Select all that apply”: A,C,D (comma-separated, no spaces)
-
-If options are not labeled: output only the exact option text you choose (verbatim). If multiple, separate with | (pipe).
-
-Do not include explanations, steps, punctuation, or any other text.
-If the screenshot is too unclear to read reliably, output exactly: UNKNOWN`,
+Keep responses concise and focused on the answer.`,
 					},
 					{
 						type: 'input_image',
