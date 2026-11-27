@@ -12,9 +12,8 @@
 	window.__chatgpt_widget_injected__ = true;
 
 	// ============ CONFIGURATION ============
-	const OPENAI_API_KEY =
-		'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';
-	const MODEL_NAME = 'gpt-5.2-2025-12-11';
+	const OPENAI_API_KEY = '';
+	const MODEL_NAME = 'gpt-6.2-sol';
 	const API_ENDPOINT = 'https://api.openai.com/v1/responses';
 	// =======================================
 
@@ -415,9 +414,10 @@ Keep responses concise and focused on the answer.`,
 
 			// Parse Responses API output structure
 			let assistantMessage = '';
+			let messageObj = null;
 			if (data.output && Array.isArray(data.output)) {
-				// Find the message object in output array
-				const messageObj = data.output.find((item) => item.type === 'message');
+				// Last message item is the final answer (earlier ones may be commentary)
+				messageObj = data.output.findLast((item) => item.type === 'message');
 				if (
 					messageObj &&
 					messageObj.content &&
@@ -433,10 +433,11 @@ Keep responses concise and focused on the answer.`,
 				}
 			}
 
-			// Add to conversation history
+			// Add to conversation history; newer models expect `phase` echoed back on assistant turns
 			conversationHistory.push({
 				role: 'assistant',
 				content: assistantMessage,
+				...(messageObj?.phase && { phase: messageObj.phase }),
 			});
 
 			// Display assistant message

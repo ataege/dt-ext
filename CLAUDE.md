@@ -86,18 +86,19 @@ All state is maintained in content.js:
 ### API Configuration
 
 Located at the top of content.js (lines 14-18):
-- `OPENAI_API_KEY`: Must be configured with valid OpenAI API key
-- `MODEL_NAME`: Currently set to 'gpt-5.1-2025-11-13' (supports vision)
+- `OPENAI_API_KEY`: Empty string in the repo; paste your own key locally and never commit it (empty key shows a config error in the widget)
+- `MODEL_NAME`: Currently set to 'gpt-6.2-sol' (supports image input; 'gpt-6.2-astra' is the pricier flagship alternative). GPT-5.1 is deprecated (shutdown Apr 1, 2027)
 - `API_ENDPOINT`: OpenAI Responses API endpoint (`/v1/responses`)
 
 **Note**: The extension now uses the **Responses API** instead of Chat Completions. This provides better performance, improved cache utilization, and built-in support for tools like web search and code interpreter.
 
 **Responses API Key Differences:**
 - Uses `input` parameter instead of `messages` in requests (content.js:365)
-- Uses `reasoning.effort: "xhigh"` for better reasoning quality (content.js:361-363)
+- Uses `reasoning.effort: "medium"` (gpt-6.2 accepts low/medium/high/xhigh/max; `none` is rejected)
 - Complex response structure with `output` array containing multiple objects (content.js:376-388):
   - `output` array may contain `reasoning` and `message` objects
-  - Text extracted from: `output.find(type='message').content.find(type='output_text').text`
+  - Text extracted from the last message item: `output.findLast(type='message').content.find(type='output_text').text`
+  - The message's `phase` (`commentary`/`final_answer`) is echoed back on the assistant history entry, as OpenAI requires for newer models
 - Uses different content types: `input_text` and `input_image` instead of `text` and `image_url` (content.js:292-297)
 - Image URL format: `image_url: "data:image/png;base64,..."` (string) instead of `image_url: { url: "..." }` (object)
 - Supported content types: `input_text`, `input_image`, `output_text`, `refusal`, `input_file`, `computer_screenshot`, `summary_text`
@@ -122,7 +123,7 @@ test-ext/
 ## Important Notes
 
 ### Security
-- API keys are currently hardcoded in content.js:15 for personal use
+- `OPENAI_API_KEY` in content.js:15 is committed as an empty string; never commit a real key
 - Extension has `<all_urls>` permission to work on all websites
 - Screenshot capability requires `activeTab` and `tabs` permissions
 
@@ -185,7 +186,7 @@ The extension now supports complete GitHub Flavored Markdown (GFM):
 - Responsive tables and images
 
 ### Current Model Configuration
-The extension is configured to use 'gpt-5.1-2025-11-13' which requires:
+The extension is configured to use 'gpt-6.2-sol' which requires:
 - Valid OpenAI API key with access to this model
 - Screenshot analysis uses vision capabilities
-- Temperature set to 0.7 for balanced responses
+- No `temperature` is sent; reasoning effort controls response quality

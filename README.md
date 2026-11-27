@@ -6,7 +6,7 @@ A non-intrusive Chrome extension that embeds a ChatGPT chat interface on any web
 
 ✨ **Complete Isolation**: Uses Shadow DOM and iframe to prevent any interference with the host page
 🎯 **Non-Intrusive**: No blur, focusout, or document events triggered on the host page
-💬 **ChatGPT Integration**: Direct integration with OpenAI's API (GPT-4o with vision support)
+💬 **ChatGPT Integration**: Direct integration with OpenAI's Responses API (GPT-6.2 Sol with vision support)
 📸 **Screenshot Capture**: Capture and analyze the current page with a single click
 🎨 **Beautiful UI**: Modern, draggable bottom-right corner widget
 ⚡ **Zero Conflicts**: Isolated from all webpage scripts and styles
@@ -22,9 +22,9 @@ A non-intrusive Chrome extension that embeds a ChatGPT chat interface on any web
 
 ### 2. Configure the Extension
 
-1. Open `chat.js` in a text editor
-2. Find line 7: `const OPENAI_API_KEY = 'YOUR_API_KEY_HERE';`
-3. Replace `YOUR_API_KEY_HERE` with your actual API key
+1. Open `content.js` in a text editor
+2. Find `const OPENAI_API_KEY = '';` near the top (CONFIGURATION block)
+3. Put your actual API key between the quotes
 4. Save the file
 
 **Example:**
@@ -115,25 +115,20 @@ test-ext/
 
 ### Model Configuration
 
-The extension is currently configured to use **GPT-4o**, which supports:
+The extension is currently configured to use **GPT-6.2 Sol** (`gpt-6.2-sol`) via the Responses API, which supports:
 - Text conversations
 - Vision/image analysis
 - Screenshot understanding
 
-To change the model, edit `chat.js` line 12:
+To change the model, edit `MODEL_NAME` in the CONFIGURATION block of `content.js`:
 ```javascript
-const MODEL_NAME = 'gpt-4o';  // or 'gpt-4-turbo', 'gpt-3.5-turbo', etc.
-```
-
-**Note:** If GPT-5.1 becomes available, simply update this line to:
-```javascript
-const MODEL_NAME = 'gpt-5.1';
+const MODEL_NAME = 'gpt-6.2-sol';  // or 'gpt-6.2-astra' (flagship, ~4x the cost)
 ```
 
 ### API Costs
 
 ⚠️ **Important**: This extension uses OpenAI's paid API. Costs depend on:
-- Model used (GPT-4o is more expensive than GPT-3.5-turbo)
+- Model used (`gpt-6.2-astra` costs ~4x more than `gpt-6.2-sol`)
 - Message length
 - Number of messages
 - Screenshot analysis (vision features cost more)

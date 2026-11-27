@@ -3,12 +3,11 @@
 
 // ============ CONFIGURATION ============
 // TODO: Replace with your actual OpenAI API key
-const OPENAI_API_KEY = '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';
+const OPENAI_API_KEY = '';
 
 // Model configuration - Using Responses API for better performance
-// Current options: 'gpt-5.2-2025-12-11', 'gpt-5.1-2025-11-13', 'gpt-4o'
-// For vision/screenshot support, use 'gpt-4o' or newer models
-const MODEL_NAME = 'gpt-5.2-2025-12-11';
+// Current options: 'gpt-6.2-sol' (default, cheaper), 'gpt-6.2-astra' (flagship); both accept images
+const MODEL_NAME = 'gpt-6.2-sol';
 
 const API_ENDPOINT = 'https://api.openai.com/v1/responses';
 // =======================================
